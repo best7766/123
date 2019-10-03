@@ -1,4 +1,4 @@
-FROM       danielguerra69/ubuntu-xrdp-base
+FROM       danielguerra/ubuntu-xrdp-base
 MAINTAINER best "https://github.com/best7766"
 
 ENV HOME /root
