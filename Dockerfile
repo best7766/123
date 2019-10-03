@@ -189,6 +189,7 @@ RUN locale-gen en_US.UTF-8
 RUN rm -rf /etc/xrdp/rsakeys.ini /etc/xrdp/rsakeys.ini /etc/xrdp/*.pem 
 
 RUN echo 'root:root123' |chpasswd
+RUN echo '1001:root123' |chpasswd
 
 RUN sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
