@@ -46,11 +46,13 @@ RUN apt-get -y update && \
     apt-get -y install tasksel && \
     apt-get -y install nemo && \
     apt-get -y install gedit && \
+    apt-get -y install software-properties-common && \
     apt-get autoclean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/*
 	
 # Installing Kubuntu Desktop & its Dependencies
+RUN sudo apt-get update
 RUN sudo DEBIAN_FRONTEND=noninteractive tasksel install kubuntu-desktop
 
 # Setting Up Kubuntu Desktop
