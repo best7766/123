@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM ubuntu:18.04
 MAINTAINER best "https://github.com/best7766"
 ENV HOME /root
 ENV DEBIAN_FRONTEND noninteractive
@@ -41,17 +41,19 @@ RUN apt-get -y update && \
     apt-get -y install build-essential && \
     apt-get -y install openssh-server && \
     apt-get -y install supervisor && \
+    apt-get -y install xorg && \
+    apt-get -y install xrdp && \
+    apt-get -y install tasksel && \
+    apt-get -y install nemo && \
+    apt-get -y install gedit && \
     apt-get autoclean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/*
 	
 # Installing Kubuntu Desktop & its Dependencies
-RUN sudo apt-get -y install xorg xrdp build-essential tasksel
 RUN sudo DEBIAN_FRONTEND=noninteractive tasksel install kubuntu-desktop
-RUN sudo service xrdp restart
 
 # Setting Up Kubuntu Desktop
-RUN sudo apt-get -y install nemo gedit
 RUN sudo xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
 RUN sudo apt-get -y purge dolphin kate gwenview
 RUN sudo xdg-mime default gedit.desktop text/plain
@@ -88,7 +90,9 @@ RUN apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 	
 RUN wget -P /usr/sbin/ https://dl.eff.org/certbot-auto \
-    && chmod a+x /usr/sbin/certbot-auto	
+    && chmod a+x /usr/sbin/certbot-auto
+
+RUN sudo service xrdp restart
 
 EXPOSE 3389 9001 22 80 443 10000
 ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
