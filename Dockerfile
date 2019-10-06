@@ -19,7 +19,7 @@ ENV TZ 'Europe/Tallinn'
 
 RUN apt-get -y update && \
     apt-get -y upgrade && \
-    apt-get -y install root && \
+    apt-get -y install sudo && \
     apt-get -y install lsof && \
     apt-get -y install vim && \
     apt-get -y install wget && \
