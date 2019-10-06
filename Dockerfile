@@ -16,71 +16,10 @@ ENV TZ 'Europe/Tallinn'
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     dpkg-reconfigure -f noninteractive tzdata && \
     apt-get clean
-    
-# Install packages
 
-ENV DEBIAN_FRONTEND noninteractive
-RUN sed -i "s/# deb-src/deb-src/g" /etc/apt/sources.list
-RUN apt-get -y update
-RUN apt-get -yy upgrade
-ENV BUILD_DEPS="git autoconf pkg-config libssl-dev libpam0g-dev \
-    libx11-dev libxfixes-dev libxrandr-dev nasm xsltproc flex \
-    bison libxml2-dev dpkg-dev libcap-dev xserver-xorg-dev"
-RUN apt-get -yy install \ 
-	sudo apt-utils software-properties-common vim wget ca-certificates \
-    xauth supervisor uuid-runtime pulseaudio locales xserver-xorg \
-    $BUILD_DEPS
-
-
-# Build xrdp
-
-WORKDIR /tmp
-RUN apt-get source pulseaudio
-RUN apt-get build-dep -yy pulseaudio
-WORKDIR /tmp/pulseaudio-8.0
-RUN dpkg-buildpackage -rfakeroot -uc -b
-WORKDIR /tmp
-RUN git clone --branch v0.9.4 --recursive https://github.com/neutrinolabs/xrdp.git
-WORKDIR /tmp/xrdp
-RUN ./bootstrap
-RUN ./configure
-RUN make
-RUN make install
-WORKDIR /tmp/xrdp/sesman/chansrv/pulse
-RUN sed -i "s/\/tmp\/pulseaudio\-10\.0/\/tmp\/pulseaudio\-8\.0/g" Makefile 
-RUN make
-RUN cp *.so /usr/lib/pulse-8.0/modules/
-
-# Build xorgxrdp
-
-WORKDIR /tmp
-RUN git clone --branch v0.2.4 --recursive https://github.com/neutrinolabs/xorgxrdp.git
-WORKDIR /tmp/xorgxrdp
-RUN ./bootstrap
-RUN ./configure
-RUN make
-RUN make install
-
-# Clean 
-
-WORKDIR /
-RUN apt-get -yy remove xscreensaver
-RUN apt-get -yy remove $BULD_DEPS
-RUN apt-get -yy autoremove
-RUN apt-get -yy clean
-RUN rm -rf /tmp/*
-
-# Configure
-ADD etc /etc
-ADD bin /usr/bin
-RUN mkdir /var/run/dbus
-RUN cp /etc/X11/xrdp/xorg.conf /etc/X11
-RUN sed -i "s/xrdp\/xorg/xorg/g" /etc/xrdp/sesman.ini
-RUN locale-gen en_US.UTF-8
- 
-    
 RUN apt-get -y update && \
     apt-get -y upgrade && \
+    apt-get -y install root && \
     apt-get -y install lsof && \
     apt-get -y install vim && \
     apt-get -y install wget && \
@@ -101,81 +40,56 @@ RUN apt-get -y update && \
     apt-get -y install dialog && \
     apt-get -y install build-essential && \
     apt-get -y install openssh-server && \
+    apt-get -y install supervisor && \
     apt-get autoclean && \
     apt-get autoremove && \
     rm -rf /var/lib/apt/lists/*
+	
+# Installing Kubuntu Desktop & its Dependencies
+RUN sudo apt-get -y install xorg xrdp build-essential tasksel
+RUN sudo DEBIAN_FRONTEND=noninteractive tasksel install kubuntu-desktop
+RUN sudo service xrdp restart
 
-RUN dpkg --add-architecture i386 && \
-    apt-get update -y && \
-    apt-get install -y software-properties-common wget apt-transport-https && \
-    wget https://dl.winehq.org/wine-builds/Release.key && \
-    apt-key add Release.key && \
-    apt-add-repository 'deb http://dl.winehq.org/wine-builds/ubuntu/ artful main' && \
-    apt-get update -y && \
-    apt-get install -y cabextract redis-server winehq-stable xvfb wget psmisc python-pip python3-pip aptitude net-tools curl vim git sed &&\
-    pip2 install supervisor && \
-    pip2 install --upgrade pip && \
-    pip3 install --upgrade pip && \
-    rm -rf /var/lib/apt/lists/* && \
-    apt-get autoclean -y
+# Setting Up Kubuntu Desktop
+RUN sudo apt-get -y install nemo gedit
+RUN sudo xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
+RUN sudo apt-get -y purge dolphin kate gwenview
+RUN sudo xdg-mime default gedit.desktop text/plain
+RUN sudo rm -f /*/Desktop/trash.desktop
+RUN sudo rm -f /*/*/Desktop/trash.desktop
+RUN sudo apt-get autoclean
+RUN sudo apt-get autoremove
 
-RUN useradd -u 1001 -d /home/wine -m -s /bin/bash wine
-ENV HOME /home/wine
-ENV WINEPREFIX /home/wine/.wine
-ENV WINEDEBUG -all
-ENV WINEARCH win32
-
-RUN wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
-    chmod +x winetricks && \
-    rm -rf /tmp/.wine* && \
-    su -p -l wine -c winecfg && \
-    su -p -l wine -c 'xvfb-run -a ./winetricks -q mfc40' && \
-    su -p -l wine -c 'xvfb-run -a ./winetricks -q mfc42' && \
-    su -p -l wine -c 'xvfb-run -a ./winetricks -q msvcirt' && \
-    su -p -l wine -c 'xvfb-run -a ./winetricks -q vcrun6' && \
-    su -p -l wine -c 'xvfb-run -a ./winetricks -q vcrun2010' && \
-    su -p -l wine -c 'xvfb-run -a ./winetricks -q vcrun2013' && \
-    su -p -l wine -c 'xvfb-run -a ./winetricks -q vcrun2015' && \
-    rm winetricks && \
-    rm -rf /tmp/.wine*
-
-RUN wget https://raw.githubusercontent.com/Winetricks/winetricks/master/src/winetricks && \
-    chmod +x winetricks && \
-    rm -rf /tmp/.wine* && \
-    su -p -l wine -c 'xvfb-run -a ./winetricks -q dotnet40' && \
-    rm winetricks && \
-    rm -rf /tmp/.wine*
-    
-    
-# python 2.7
-RUN wget https://www.python.org/ftp/python/2.7.15/python-2.7.15.msi &&\
-    chmod +x python-2.7.15.msi && \
-    rm -rf /tmp/.wine* && \
-    su -p -l wine -c 'wine msiexec /i "python-2.7.15.msi" /passive /norestart ADDLOCAL=ALL' && \
-    cp /home/wine/.wine/drive_c/Python27/Scripts/pip.exe /home/wine/.wine/drive_c/Python27/Scripts/pip_.exe && \
-    su -p -l wine -c 'wine c:/Python27/Scripts/pip_.exe install --upgrade pip' && \
-    rm /home/wine/.wine/drive_c/Python27/Scripts/pip_.exe && \
-    rm python-2.7.15.msi && \
-    rm -rf /tmp/.wine*
-    
-# clean
-RUN apt-get purge -y software-properties-common && \
-    apt-get autoclean -y
-
-
-# Clean preconfigured stuff
-
-RUN rm -rf /etc/xrdp/rsakeys.ini /etc/xrdp/rsakeys.ini /etc/xrdp/*.pem 
+# Installing WINE to run Windows Applications
+RUN sudo dpkg --add-architecture i386
+RUN sudo wget -nc https://dl.winehq.org/wine-builds/winehq.key
+RUN sudo apt-key add winehq.key
+RUN sudo apt-add-repository https://dl.winehq.org/wine-builds/ubuntu/
+RUN sudo apt-get update
+RUN sudo apt-get install --install-recommends winehq-devel -y
+RUN sudo apt-get install winetricks -y
+	
 
 RUN echo 'root:root123' |chpasswd
-RUN echo '1001:root123' |chpasswd
 
 RUN sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config
 RUN sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config
 RUN mkdir /root/.ssh
-# Docker config
 
-VOLUME ["/etc","/home"]
-EXPOSE 3389 9001 22 80
+RUN echo "deb http://download.webmin.com/download/repository sarge contrib" >> /etc/apt/sources.list
+RUN echo "deb http://webmin.mirror.somersettechsolutions.co.uk/repository sarge contrib" >> /etc/apt/sources.list
+RUN wget -q http://www.webmin.com/jcameron-key.asc -O- | sudo apt-key add -
+RUN rm /etc/apt/apt.conf.d/docker-gzip-indexes
+RUN apt-get -o Acquire::GzipIndexes=false update -y
+RUN apt-get install apt-show-versions -y
+RUN apt-get update && apt-get install webmin -y
+RUN yes | /usr/share/webmin/authentic-theme/theme-update.sh
+RUN apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+	
+RUN wget -P /usr/sbin/ https://dl.eff.org/certbot-auto \
+    && chmod a+x /usr/sbin/certbot-auto	
+
+EXPOSE 3389 9001 22 80 443 10000
 ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
 CMD ["supervisord"]
