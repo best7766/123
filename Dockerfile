@@ -55,7 +55,6 @@ RUN sudo DEBIAN_FRONTEND=noninteractive tasksel install kubuntu-desktop
 
 # Setting Up Kubuntu Desktop
 RUN sudo xdg-mime default nemo.desktop inode/directory application/x-gnome-saved-search
-RUN sudo apt-get -y purge dolphin kate gwenview
 RUN sudo xdg-mime default gedit.desktop text/plain
 RUN sudo rm -f /*/Desktop/trash.desktop
 RUN sudo rm -f /*/*/Desktop/trash.desktop
