@@ -1,10 +1,17 @@
-## Ubuntu 18.04 Xenial Multi User Remote Desktop Server Base
+## Ubuntu 18.04 Multi User Remote Desktop Server Base KUBUNTU-DESKTOP+RDP+SSH+APACHE2+SSL+WEBMIN+SUPERVISOR
 
-Base image for fully implemented Multi User xrdp with xorgxrdp and 
-pulseaudio on Ubuntu 16.04.Copy/Paste and sound is working. 
-Users can re-login in the same session.No window manager or 
-X appications are installed.Intended for building different 
-desktops with rdp.
+Base image for fully implemented Multi User rdp with ssh and 
+apache2 with ssl and webmin Ubuntu 18.04.Copy/Paste working. 
+Users can re-login in the same session and Supervisor: A Process Control System.
+
+## Usage
+rdp -p 3389:3389
+ssh -p 22:22
+apache2 -p 80:80
+webmin 10000:10000
+ssl 443:443
+supervisor 9001:9001
+
 
 ## Entrypoint and Services
 
@@ -23,50 +30,6 @@ You can add services in supervisor by adding a .conf file to
 The entrypoint needed for your service can be added to
 /etc/entrypoint.d/
 
-Dockerfile example
-```
-FROM base
-MAINTAINER Daniel Guerra
-RUN apt-get update
-RUN apt-get -yy install ubuntu-mate-desktop
-RUN echo "mate-session" > /etc/skel/.Xclients
-```
-
-## Xsession startup
-
-For starting a desktop environment use the .Xclients file and
-put it in /etc/skel/.Xlients
-For XCFE4 use xfce4-session
-For Mate use mate-ssesion 
-After creating a new user all files from /etc/skel are copied
-to the user map.
-
-## Usage
-
-Start the rdp server, the /etc and /home dir can be used as a volume 
-
-```bash
-docker run -d --name uxrdp --hostname terminalserver -v /tmp/home:/home \
-  -p 3389:3389 -p 2222:22 danielguerra/ubuntu-xrdp-base
-```
-*note if you allready use a rdp server on 3389 change -p <my-port>:3389
-	  -p 2222:22 is for ssh access ( ssh -p 2222 ubuntu@<docker-ip> )
-	  for firefox use --shm-size 1g
-
-
-Connect with your remote desktop client to the docker server.
-Use the Xorg session (leave as it is), user and pass.
-
-## Add new users
-
-No configuration is needed for new users just do
-
-```bash
-docker exec -ti uxrdp adduser mynewuser
-```
-
-After this the new user can login
-
 ## Add new services
 
 To make sure all processes are working supervisor is installed.
@@ -83,19 +46,9 @@ autorestart=true \
 priority=100" > /etc/supervisor/conf.d/mysql.conf
 supervisorctl update
 ```
-
-
 ## Add new entrypoint
 
 To make sure your service will run because all conditions are fixed.
 In the docker-entrypoint is a loop to run the entrypoint configuration 
 files. The are sorted by name to determine the order and the language
 used is "bash".
-
-Example: Add mysql entrypoint
-
-```bash
-echo "mkdir -p /var/lib/mysql \
-chown -R mysql:mysql /var/lib/mysql" > /etc/entrypoint.d/06-mysql.conf
-
-```
