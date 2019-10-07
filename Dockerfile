@@ -64,13 +64,13 @@ RUN sudo apt-get autoclean
 RUN sudo apt-get autoremove
 
 # Installing WINE to run Windows Applications
-RUN sudo dpkg --add-architecture i386
-RUN sudo wget -nc https://dl.winehq.org/wine-builds/winehq.key
-RUN sudo apt-key add winehq.key
-RUN sudo apt-add-repository https://dl.winehq.org/wine-builds/ubuntu/
-RUN sudo apt-get update
-RUN sudo apt-get install --install-recommends winehq-devel -y
-RUN sudo apt-get install winetricks -y
+# RUN sudo dpkg --add-architecture i386
+# RUN sudo wget -nc https://dl.winehq.org/wine-builds/winehq.key
+# RUN sudo apt-key add winehq.key
+# RUN sudo apt-add-repository https://dl.winehq.org/wine-builds/ubuntu/
+# RUN sudo apt-get update
+# RUN sudo apt-get install --install-recommends winehq-devel -y
+# RUN sudo apt-get install winetricks -y
 	
 
 RUN echo 'root:root123' |chpasswd
@@ -93,7 +93,7 @@ RUN apt-get clean && \
 RUN wget -P /usr/sbin/ https://dl.eff.org/certbot-auto \
     && chmod a+x /usr/sbin/certbot-auto
 
-RUN sudo service xrdp restart
+# RUN sudo service xrdp restart
 
 EXPOSE 3389 9001 22 80 443 10000
 ENTRYPOINT ["/usr/bin/docker-entrypoint.sh"]
