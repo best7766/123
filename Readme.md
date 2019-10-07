@@ -1,4 +1,4 @@
-## Ubuntu 16.04 Xenial Multi User Remote Desktop Server Base
+## Ubuntu 18.04 Xenial Multi User Remote Desktop Server Base
 
 Base image for fully implemented Multi User xrdp with xorgxrdp and 
 pulseaudio on Ubuntu 16.04.Copy/Paste and sound is working. 
