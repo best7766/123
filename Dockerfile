@@ -92,7 +92,7 @@ RUN apt-get clean && \
 	
 RUN wget -P /usr/sbin/ https://dl.eff.org/certbot-auto \
     && chmod a+x /usr/sbin/certbot-auto
-
+RUN chmod a+x /usr/bin/docker-entrypoint.sh
 # RUN sudo service xrdp restart
 
 EXPOSE 3389 9001 22 80 443 10000
