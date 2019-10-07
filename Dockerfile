@@ -94,8 +94,9 @@ RUN wget -P /usr/sbin/ https://dl.eff.org/certbot-auto \
     && chmod a+x /usr/sbin/certbot-auto
 COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod 777 /usr/local/bin/docker-entrypoint.sh
+RUN ln -sf usr/local/bin/docker-entrypoint.sh /entrypoint.sh # backwards compat
 # RUN sudo service xrdp restart
 
 EXPOSE 3389 9001 22 80 443 10000
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["supervisord"]
