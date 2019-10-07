@@ -5,6 +5,7 @@ apache2 with ssl and webmin Ubuntu 18.04.Copy/Paste working.
 Users can re-login in the same session and Supervisor: A Process Control System.
 
 ## Usage
+LOGIN root:root123
 rdp -p 3389:3389
 ssh -p 22:22
 apache2 -p 80:80
